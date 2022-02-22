@@ -96,36 +96,51 @@ class Sentence():
         self.count = count
 
     def __eq__(self, other):
+        """
+        Checks if two Sentence instances are equal.
+        """
         return self.cells == other.cells and self.count == other.count
 
     def __str__(self):
+        """
+        Exemple: {(2, 3), (1, 1), (5, 2)} = 3
+        """
         return f"{self.cells} = {self.count}"
 
     def known_mines(self):
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        raise NotImplementedError
+        if self.count == len(self.cells):
+            return self.cells
+        else:
+            return set()
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        raise NotImplementedError
+        if self.count == 0:
+            return self.cells
+        else:
+            return set()
 
     def mark_mine(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be a mine.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.cells.remove(cell)
+            self.count = self.count - 1
 
     def mark_safe(self, cell):
         """
         Updates internal knowledge representation given the fact that
         a cell is known to be safe.
         """
-        raise NotImplementedError
+        if cell in self.cells:
+            self.cells.remove(cell)
 
 
 class MinesweeperAI():
@@ -182,7 +197,58 @@ class MinesweeperAI():
             5) add any new sentences to the AI's knowledge base
                if they can be inferred from existing knowledge
         """
-        raise NotImplementedError
+        # 1)
+        self.moves_made.add(cell)
+
+        # 2)
+        self.mark_safe(cell)
+        
+        # 3)
+        neighboring = []
+        # Loop over all cells within one row and column
+        for i in range(cell[0] - 1, cell[0] + 2):
+            for j in range(cell[1] - 1, cell[1] + 2):
+
+                # Ignore the cell itself
+                if (i, j) == cell:
+                    continue
+
+                # Update neighboring if cell in bounds
+                if 0 <= i < self.height and 0 <= j < self.width:
+                    neighboring.append((i,j))
+
+        sentence = Sentence(cells=neighboring, count=count)
+
+        for cell in neighboring:
+            if cell in self.mines:
+                sentence.mark_mine(cell)
+            elif cell in self.safes:
+                sentence.mark_safe(cell)
+
+        self.knowledge.append(sentence)
+
+        # 4)
+        for sentence in self.knowledge:
+            newMines = sentence.known_mines()
+            for mine in newMines:
+                self.mark_mine(mine)
+            newSafes = sentence.known_safes()
+            for safe in newSafes:
+                self.mark_safe(safe)
+
+        # 5)
+        for sentence1 in self.knowledge:
+            for sentence2 in self.knowledge:
+
+                sentence1: Sentence
+                sentence2: Sentence
+
+                if(sentence1.cells <= sentence2.cells):
+                    cells = sentence2.cells - sentence1.cells
+                    counter = sentence2.count - sentence1.count
+
+                    sentence = Sentence(cells=cells, count=counter)
+                    self.knowledge.append(sentence)
 
     def make_safe_move(self):
         """
@@ -193,7 +259,10 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        raise NotImplementedError
+        for safe in self.safes:
+            if safe not in self.moves_made:
+                return safe
+        return None
 
     def make_random_move(self):
         """
@@ -202,4 +271,9 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        raise NotImplementedError
+        i = random.randint(0, self.height - 1)
+        j = random.randint(0, self.width - 1)
+
+        if ((i,j) not in self.moves_made) and ((i,j) not in self.mines):
+            return (i,j)
+        return None
