@@ -113,8 +113,7 @@ class Sentence():
         """
         if self.count == len(self.cells):
             return self.cells
-        else:
-            return set()
+        return None
 
     def known_safes(self):
         """
@@ -122,8 +121,7 @@ class Sentence():
         """
         if self.count == 0:
             return self.cells
-        else:
-            return set()
+        return None
 
     def mark_mine(self, cell):
         """
@@ -230,20 +228,29 @@ class MinesweeperAI():
         # 4)
         for sentence in self.knowledge:
             newMines = sentence.known_mines()
-            for mine in newMines:
-                self.mark_mine(mine)
+            if newMines != None:
+                nM = newMines.copy()
+                for mine in nM:
+                    self.mark_mine(mine)
             newSafes = sentence.known_safes()
-            for safe in newSafes:
-                self.mark_safe(safe)
+            if newSafes != None:
+                nS = newSafes.copy()
+                for safe in nS:
+                    self.mark_safe(safe)
 
         # 5)
-        for sentence1 in self.knowledge:
-            for sentence2 in self.knowledge:
+        for i, sentence1 in enumerate(self.knowledge):
+            for j, sentence2 in enumerate(self.knowledge):
 
                 sentence1: Sentence
                 sentence2: Sentence
 
-                if(sentence1.cells <= sentence2.cells):
+                if len(sentence1.cells) == 0 and sentence1.count == 0:
+                    continue
+                if len(sentence2.cells) == 0 and sentence2.count == 0:
+                    continue
+
+                if(sentence1.cells < sentence2.cells and i < j):
                     cells = sentence2.cells - sentence1.cells
                     counter = sentence2.count - sentence1.count
 
@@ -259,10 +266,11 @@ class MinesweeperAI():
         This function may use the knowledge in self.mines, self.safes
         and self.moves_made, but should not modify any of those values.
         """
-        for safe in self.safes:
-            if safe not in self.moves_made:
-                return safe
-        return None
+        safeCells = self.safes - self.moves_made
+        if not safeCells:
+            return None
+        move = safeCells.pop()
+        return move
 
     def make_random_move(self):
         """
@@ -271,9 +279,14 @@ class MinesweeperAI():
             1) have not already been chosen, and
             2) are not known to be mines
         """
-        i = random.randint(0, self.height - 1)
-        j = random.randint(0, self.width - 1)
-
-        if ((i,j) not in self.moves_made) and ((i,j) not in self.mines):
-            return (i,j)
-        return None
+        all_moves = set()
+        for i in range(self.height):
+            for j in range(self.width):
+                if (i,j) not in self.mines and (i,j) not in self.moves_made:
+                    all_moves.add((i,j))
+        # No moves left
+        if len(all_moves) == 0:
+            return None
+        # Return available
+        move = random.choice(tuple(all_moves))
+        return move
