@@ -102,9 +102,6 @@ class Sentence():
         return self.cells == other.cells and self.count == other.count
 
     def __str__(self):
-        """
-        Exemple: {(2, 3), (1, 1), (5, 2)} = 3
-        """
         return f"{self.cells} = {self.count}"
 
     def known_mines(self):
