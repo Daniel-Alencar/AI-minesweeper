@@ -31,7 +31,7 @@ Parte deste projeto foi disponibilizado por [Harvard Extension School](https://e
 ### Requisitos
 
 Para rodar este jogo, você vai precisar ter instalado em sua máquina as seguintes ferramentas:
-[Git](https://git-scm.com) e [Python + pip](https://www.python.org/downloads/).
+[Git](https://git-scm.com), [Python + pip](https://www.python.org/downloads/) e [virtualenv](https://virtualenv.pypa.io/en/latest/).
 
 ### Passo-a-passo
 
@@ -41,6 +41,12 @@ $ git clone https://github.com/Daniel-Alencar/AI-minesweeper
 
 # Acesse a pasta do projeto no terminal/cmd
 $ cd AI-minesweeper
+
+# Crie um ambiente virtual para instalar as dependências
+$ virtualenv myENV
+
+# Entre no ambiente virtual
+$ source myENV/bin/activate
 
 # Instale as dependências
 $ pip3 install -r requirements.txt
